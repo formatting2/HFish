@@ -170,6 +170,7 @@ func initCahe() {
 }
 
 func Run() {
+	gin.SetMode(gin.ReleaseMode)
 	ping.Ping()
 
 	// 启动 自定义 蜜罐
