@@ -19,7 +19,7 @@ func AlertMail(model string, typex string, agent string, ipx string, country str
 	// 判断邮件通知
 	try.Try(func() {
 		// 只有新加入才会发送邮件通知
-		if (model == "new") {
+		if model == "new" {
 			status, _ := cache.Get("MailConfigStatus")
 
 			// 判断是否启用通知
@@ -27,10 +27,10 @@ func AlertMail(model string, typex string, agent string, ipx string, country str
 				info, _ := cache.Get("MailConfigInfo")
 				config := strings.Split(info.(string), "&&")
 
-				if (country == "本地地址") {
+				if country == "本地地址" {
 					region = ""
 					city = ""
-				} else if (country == "局域网") {
+				} else if country == "局域网" {
 					region = ""
 					city = ""
 				}
@@ -38,8 +38,8 @@ func AlertMail(model string, typex string, agent string, ipx string, country str
 				// 判断是否开启脱敏
 				passwdConfigStatus, _ := cache.Get("PasswdConfigStatus")
 
-				if (passwdConfigStatus == "1") {
-					if (typex == "FTP" || typex == "SSH") {
+				if passwdConfigStatus == "1" {
+					if typex == "FTP" || typex == "SSH" {
 						// 获取脱敏加密字符
 						passwdConfigInfo, _ := cache.Get("PasswdConfigInfo")
 
@@ -65,6 +65,76 @@ func AlertMail(model string, typex string, agent string, ipx string, country str
 		}
 	}).Catch(func() {
 	})
+}
+
+func AlertWechatBoot(model string, typex string, agent string, ipx string, country string, region string, city string, infox string) {
+	// 判断 WebHook 通知
+	if model == "new" {
+		try.Try(func() {
+			if country == "本地地址" {
+				region = ""
+				city = ""
+			} else if country == "局域网" {
+				region = ""
+				city = ""
+			}
+
+			passwdConfigStatus, _ := cache.Get("PasswdConfigStatus")
+
+			if passwdConfigStatus == "1" {
+				if typex == "FTP" || typex == "SSH" {
+					// 获取脱敏加密字符
+					passwdConfigInfo, _ := cache.Get("PasswdConfigInfo")
+
+					arr := strings.Split(infox, "&&")
+
+					infox = arr[0] + "&&" + passwd.Desensitization(arr[1], passwdConfigInfo.(string))
+				}
+			}
+
+			text := fmt.Sprintf(
+				`集群名称：<font color="warning">%s</font>
+						攻击IP：<font color="warning">%s</font>
+						地理信息：<font color="warning">%s %s %s</font>
+						探针类型：<font color="warning">%s</font>
+						上钩内容：<font color="warning">%s</font>`, agent, ipx, country, region, city, typex, infox)
+			type MarkdownMsg struct {
+				Content string `json:"content"`
+			}
+
+			type HookMsg struct {
+				Msgtype  string      `json:"msgtype"`
+				Markdown MarkdownMsg `json:"markdown"`
+			}
+
+			sendMsg := HookMsg{
+				Msgtype:  "markdown",
+				Markdown: MarkdownMsg{Content: text},
+			}
+
+			var buf bytes.Buffer
+			enc := json.NewEncoder(&buf)
+			enc.SetEscapeHTML(false)
+			err := enc.Encode(sendMsg)
+			reader := bytes.NewReader(buf.Bytes())
+
+			request, _ := http.NewRequest("POST", "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=", reader)
+			request.Header.Set("Content-Type", "application/json;charset=UTF-8")
+
+			client := http.Client{}
+			resp, err := client.Do(request)
+
+			if err != nil {
+				log.Pr("HFish", "127.0.0.1", "Wechat Boot 调用失败", err)
+			} else {
+				log.Pr("HFish", "127.0.0.1", "Wechat Boot 调用成功")
+			}
+
+			defer resp.Body.Close()
+
+		}).Catch(func() {
+		})
+	}
 }
 
 func AlertWebHook(id string, model string, typex string, projectName string, agent string, ipx string, country string, region string, city string, infox string, time string) {
@@ -114,7 +184,7 @@ func AlertWebHook(id string, model string, typex string, projectName string, age
 
 // 大数据展示
 func AlertDataWs(model string, typex string, projectName string, agent string, ipx string, country string, region string, city string, time string) {
-	if (model == "new") {
+	if model == "new" {
 		// 拼接字典
 		d := data.MakeDataJson("center_data", map[string]interface{}{
 			"type":        typex,

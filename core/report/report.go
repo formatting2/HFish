@@ -38,6 +38,9 @@ func alertx(id string, model string, typex string, projectName string, agent str
 
 	// 大数据展示
 	alert.AlertDataWs(model, typex, projectName, agent, ipx, country, region, city, timex)
+
+	// 增加企业微信机器人告警
+	alert.AlertWechatBoot(model, typex, agent, ipx, country, region, city, infox)
 }
 
 // 上报 集群 状态
