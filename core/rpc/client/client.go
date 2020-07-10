@@ -1,12 +1,14 @@
 package client
 
 import (
-	"HFish/utils/log"
-	"HFish/utils/conf"
 	"HFish/core/rpc/core"
-	"strings"
+	"HFish/utils/conf"
+	"HFish/utils/log"
 	"fmt"
+	"strings"
 )
+
+var SEND_MESSAGE = false
 
 // 上报状态结构
 type Status struct {
@@ -45,7 +47,7 @@ func RpcInit() {
 }
 
 func reportStatus(rpcName string, ftpStatus string, telnetStatus string, httpStatus string, mysqlStatus string, redisStatus string, sshStatus string, webStatus string, darkStatus string, memCacheStatus string, plugStatus string, esStatus string, tftpStatus string, vncStatus string, customStatus string) {
-	if (rpcClient != nil) {
+	if rpcClient != nil {
 		status := Status{
 			ipAddr,
 			rpcName,
@@ -81,8 +83,9 @@ func reportStatus(rpcName string, ftpStatus string, telnetStatus string, httpSta
 
 func ReportResult(typex string, projectName string, sourceIp string, info string, id string) string {
 	var reply string
-
-	if (rpcClient != nil) {
+	if !SEND_MESSAGE {
+		return "0"
+	} else if rpcClient != nil {
 		// projectName 只有 WEB 才需要传项目名 其他协议空即可
 		// id 0 为 新插入数据，非 0 都是更新数据
 		// id 非 0 的时候 sourceIp 为空
@@ -97,7 +100,7 @@ func ReportResult(typex string, projectName string, sourceIp string, info string
 			info,
 			id,
 		}
-
+		fmt.Println("Go....")
 		err := rpcClient.Call("HFishRPCService.ReportResult", result, &reply)
 
 		if err != nil {

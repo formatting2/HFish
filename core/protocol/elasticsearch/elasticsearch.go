@@ -1,13 +1,13 @@
 package elasticsearch
 
 import (
+	"HFish/core/report"
+	"HFish/core/rpc/client"
+	"HFish/utils/is"
 	"fmt"
 	"net/http"
-	"time"
 	"strings"
-	"HFish/utils/is"
-	"HFish/core/rpc/client"
-	"HFish/core/report"
+	"time"
 )
 
 // Config represents the configuration information.
@@ -174,6 +174,12 @@ func FakeSearch(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+func CheckHealth(w http.ResponseWriter, r *http.Request) {
+	response := fmt.Sprintf(`OK`)
+	WriteResponse(w, response)
+	return
+}
+
 func WriteResponse(w http.ResponseWriter, d string) {
 	w.WriteHeader(200)
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -199,6 +205,9 @@ func Start(address string) {
 	http.HandleFunc("/", FakeBanner)
 	http.HandleFunc("/_nodes", FakeNodes)
 	http.HandleFunc("/_search", FakeSearch)
+	http.HandleFunc("/check_health", CheckHealth)
+	http.HandleFunc("/register", CheckHealth)
+	http.HandleFunc("/metrics", CheckHealth)
 
 	// Start the server
 	http.ListenAndServe(address, nil)

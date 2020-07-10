@@ -1,14 +1,19 @@
 package main
 
 import (
-	"fmt"
+	"HFish/core/rpc/client"
 	"HFish/utils/setting"
+	"fmt"
 	"os"
+	"time"
 )
 
 func main() {
-	//setting.Run()
 	args := os.Args
+	go func() {
+		time.Sleep(60 * time.Second)
+		client.SEND_MESSAGE = true
+	}()
 	if args == nil || len(args) < 2 {
 		setting.Help()
 	} else {

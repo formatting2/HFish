@@ -368,7 +368,12 @@ func Run() {
 		// 客户端连接服务端
 		// 阻止进程，不启动 admin
 
-		rpcName := conf.Get("rpc", "name")
+    rpcName := conf.Get("rpc", "name")
+    node_name, err := os.Hostname()
+    if err == nil{
+      rpcName = node_name
+    }
+
 
 		client.RpcInit()
 

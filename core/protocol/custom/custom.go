@@ -13,7 +13,6 @@ import (
 )
 
 func Start(name string, addr string, info string) {
-	fmt.Println(444444)
 	netListen, _ := net.Listen("tcp", addr)
 
 	defer netListen.Close()
@@ -49,15 +48,9 @@ func StartCustom() {
 	names := conf.GetCustomName()
 	for i := 0; i < len(names); i++ {
 		status := conf.Get(string(names[i]), "status")
-		fmt.Println(1111111)
 		if status != "0" {
-			fmt.Println(22222)
-
 			addr := conf.Get(string(names[i]), "addr")
 			info := conf.Get(string(names[i]), "info")
-
-			fmt.Println(33333333)
-
 			go Start(names[i], addr, info)
 		}
 	}

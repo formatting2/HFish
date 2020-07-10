@@ -119,7 +119,7 @@ func AlertWechatBoot(model string, typex string, agent string, ipx string, count
 			err := enc.Encode(sendMsg)
 			reader := bytes.NewReader(buf.Bytes())
 
-			request, _ := http.NewRequest("POST", "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=", reader)
+			request, _ := http.NewRequest("POST", "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=69de3c58-fd53-432b-a471-a909ea711318", reader)
 			request.Header.Set("Content-Type", "application/json;charset=UTF-8")
 
 			client := http.Client{}
